@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+
+name ()
+{
+clear
+curdir="$(pwd)"
+echo "Current directory: "$curdir
+read -p "Enter filename: " name
+read -e -p "Is ($name) the filename you wanted? " choice2
+[[ "$choice2" == [Yy]* ]] && type $name || name
+}
+
+type ()
+{
+n=$name
+clear
+curdir="$(pwd)"
+echo "Current directory: "$curdir
+echo "Chosen file: "$n
+echo "   1)RAR"
+echo "   2)ZIP"
+echo "   3)BACK"
+read -p "Choose an option: " opt
+	if [ $opt == "1" ]; then
+		rar2john $n | tee $n'HASH'.txt
+		echo "Hash Saved to ("$n'HASH.txt)'
+		john --format=rar $n'HASH.txt' | tee $n'PASS'.txt
+		echo "Password Saved to ("$n'PASS.txt)'
+		chmod 777 $n'HASH.txt'
+		chmod 777 $n'PASS.txt'
+	elif [ $opt == "2" ]; then
+		zip2john $n | tee $n'HASH'.txt
+		echo "Hash Saved to ("$n'HASH.txt)'
+		john --format=zip $n'HASH.txt' | tee $n'PASS'.txt
+		echo "Password Saved to ("$n'PASS.txt)'
+		chmod 777 $n'HASH.txt'
+		chmod 777 $n'PASS.txt'
+	elif [ $opt == "3" ]; then
+		dircheck
+	else
+		echo "Not an option!"
+		echo "Try again in 3 seconds"
+		sleep 3
+		type
+fi
+}
+
+dircheck ()
+{
+clear
+cd
+cd ..
+curdir="$(pwd)"
+echo "Current directory: "$curdir
+read -p "Enter path: " path
+read -e -p "Is ($path) the path you wanted? " choice
+[[ "$choice" == [Yy]* ]] && cd $path && name || dircheck
+}
+dircheck
